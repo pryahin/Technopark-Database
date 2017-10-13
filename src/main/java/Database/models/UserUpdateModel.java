@@ -1,4 +1,4 @@
-package Database.models;
+package Database.Models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
