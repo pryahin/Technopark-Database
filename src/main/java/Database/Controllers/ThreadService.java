@@ -1,5 +1,7 @@
 package Database.Controllers;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -10,27 +12,27 @@ import org.springframework.web.bind.annotation.RestController;
 public class ThreadService {
 
     @RequestMapping(value = "/{slug_or_id}/create", method = RequestMethod.POST)
-    public String createPost(@PathVariable(name="slug_or_id") String slug) {
-        return "Post in "+slug+" created";
+    public ResponseEntity createPost(@PathVariable(name="slug_or_id") String slug) {
+        return ResponseEntity.status(HttpStatus.CREATED).body("Post in "+slug+" created");
     }
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.GET)
-    public String getThread(@PathVariable(name="slug_or_id") String slug) {
-        return "get "+slug+" thread";
+    public ResponseEntity getThread(@PathVariable(name="slug_or_id") String slug) {
+        return ResponseEntity.status(HttpStatus.OK).body("get "+slug+" thread");
     }
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.POST)
-    public String changeThread(@PathVariable(name="slug_or_id") String slug) {
-        return "changed "+slug;
+    public ResponseEntity changeThread(@PathVariable(name="slug_or_id") String slug) {
+        return ResponseEntity.status(HttpStatus.OK).body("changed "+slug);
     }
 
     @RequestMapping(value = "/{slug_or_id}/posts", method = RequestMethod.GET)
-    public String getPosts(@PathVariable(name="slug_or_id") String slug) {
-        return "[Posts] from "+slug;
+    public ResponseEntity getPosts(@PathVariable(name="slug_or_id") String slug) {
+        return ResponseEntity.status(HttpStatus.OK).body("[Posts] from "+slug);
     }
 
     @RequestMapping(value = "/{slug_or_id}/vote", method = RequestMethod.POST)
-    public String vote(@PathVariable(name="slug_or_id") String slug) {
-        return "vote "+slug;
+    public ResponseEntity vote(@PathVariable(name="slug_or_id") String slug) {
+        return ResponseEntity.status(HttpStatus.OK).body("vote "+slug);
     }
 }
