@@ -15,17 +15,22 @@ public class ForumController {
     }
 
     @RequestMapping(value = "/{slug}/create", method = RequestMethod.POST)
-    public String slugCreate(@PathVariable(name = "slug") String slug) {
+    public String createThread(@PathVariable(name = "slug") String slug) {
         return slug+" - created";
     }
 
     @RequestMapping(value = "{slug}/details", method = RequestMethod.GET)
-    public String slugDetails(@PathVariable(name = "slug") String slug) {
+    public String getDetails(@PathVariable(name = "slug") String slug) {
         return slug+": ...{details}";
     }
 
+    @RequestMapping(value = "{slug}/threads", method = RequestMethod.GET)
+    public String getThreads(@PathVariable(name = "slug") String slug) {
+        return slug+": ...{threads}";
+    }
+
     @RequestMapping(value = "{slug}/users", method = RequestMethod.GET)
-    public String slugUsers(@PathVariable(name = "slug") String slug) {
+    public String getUsers(@PathVariable(name = "slug") String slug) {
         return slug+" - users: ...";
     }
 }
