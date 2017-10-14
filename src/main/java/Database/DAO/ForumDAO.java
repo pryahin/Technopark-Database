@@ -2,7 +2,6 @@ package Database.DAO;
 
 import Database.Mappers.ForumMapper;
 import Database.Models.ForumModel;
-import Database.Models.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;

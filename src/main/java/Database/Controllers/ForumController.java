@@ -1,9 +1,11 @@
 package Database.Controllers;
 
 import Database.DAO.ForumDAO;
+import Database.DAO.ThreadDAO;
 import Database.DAO.UserDAO;
 import Database.Models.ErrorModel;
 import Database.Models.ForumModel;
+import Database.Models.ThreadModel;
 import Database.Models.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -17,11 +19,13 @@ public class ForumController {
 
     private ForumDAO forumDAO;
     private UserDAO userDAO;
+    private ThreadDAO threadDAO;
 
     @Autowired
-    public ForumController(ForumDAO forumDAO, UserDAO userDAO) {
+    public ForumController(ForumDAO forumDAO, UserDAO userDAO, ThreadDAO threadDAO) {
         this.forumDAO = forumDAO;
         this.userDAO = userDAO;
+        this.threadDAO = threadDAO;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
@@ -44,8 +48,21 @@ public class ForumController {
     }
 
     @RequestMapping(value = "/{slug}/create", method = RequestMethod.POST)
-    public ResponseEntity createThread(@PathVariable(name = "slug") String slug) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(slug + " - created");
+    public ResponseEntity createThread(@PathVariable(name = "slug") String slug, @RequestBody ThreadModel thread) {
+        thread.setForum(slug);
+        try {
+            UserModel user = userDAO.getUser(thread.getAuthor());
+            if (user == null) {
+                ErrorModel error = new ErrorModel();
+                error.setMessage("Can't find user with nickname" + thread.getAuthor());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            }
+            thread.setAuthor(user.getNickname());
+            threadDAO.createThread(thread);
+            return ResponseEntity.status(HttpStatus.CREATED).body(threadDAO.getThread(thread.getForum()));
+        } catch (DuplicateKeyException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(threadDAO.getThread(thread.getForum()));
+        }
     }
 
     @RequestMapping(value = "{slug}/details", method = RequestMethod.GET)
