@@ -20,23 +20,6 @@ public class ThreadDAO {
     @Autowired
     public ThreadDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        createTable();
-    }
-
-    public void createTable() {
-        String sql = "DROP TABLE IF EXISTS threads; " +
-                "CREATE EXTENSION IF NOT EXISTS CITEXT;" +
-                "CREATE TABLE IF NOT EXISTS threads (" +
-                "    author CITEXT NOT NULL, " +
-                "    created TIMESTAMP DEFAULT current_timestamp, " +
-                "    forum TEXT NOT NULL, " +
-                "    id SERIAL PRIMARY KEY, " +
-                "    message TEXT NOT NULL, " +
-                "    slug TEXT UNIQUE, " +
-                "    title TEXT NOT NULL, " +
-                "    votes INTEGER " +
-                ");";
-        this.namedParameterJdbcTemplate.getJdbcOperations().execute(sql);
     }
 
     public void createThread(ThreadModel thread) {

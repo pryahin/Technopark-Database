@@ -19,20 +19,6 @@ public class ForumDAO {
     @Autowired
     public ForumDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        createTable();
-    }
-
-    public void createTable() {
-        String sql = "DROP TABLE IF EXISTS forums; " +
-                "CREATE EXTENSION IF NOT EXISTS CITEXT;" +
-                "CREATE TABLE IF NOT EXISTS forums (" +
-                "    posts BIGINT, " +
-                "    slug TEXT NOT NULL, " +
-                "    threads INTEGER, " +
-                "    title TEXT NOT NULL, " +
-                "    \"user\" CITEXT NOT NULL UNIQUE " +
-                ");";
-        this.namedParameterJdbcTemplate.getJdbcOperations().execute(sql);
     }
 
     public void createForum(ForumModel forum) {

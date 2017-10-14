@@ -20,19 +20,6 @@ public class UserDAO {
     @Autowired
     public UserDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        this.createTable();
-    }
-
-    public void createTable() {
-        String sql = "DROP TABLE IF EXISTS users;" +
-                "CREATE EXTENSION IF NOT EXISTS CITEXT;" +
-                "CREATE TABLE IF NOT EXISTS users (" +
-                "about TEXT NOT NULL," +
-                "email CITEXT UNIQUE NOT NULL," +
-                "fullname TEXT NOT NULL," +
-                "nickname CITEXT UNIQUE NOT NULL PRIMARY KEY" +
-                ");";
-        this.namedParameterJdbcTemplate.getJdbcOperations().execute(sql);
     }
 
     public void addUser(UserModel user) {
