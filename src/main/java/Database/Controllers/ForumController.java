@@ -49,7 +49,8 @@ public class ForumController {
 
     @RequestMapping(value = "/{slug}/create", method = RequestMethod.POST)
     public ResponseEntity createThread(@PathVariable(name = "slug") String slug, @RequestBody ThreadModel thread) {
-        thread.setForum(slug);
+        ForumModel forum = forumDAO.getForum(slug);
+        thread.setForum(forum.getSlug());
         try {
             UserModel user = userDAO.getUser(thread.getAuthor());
             if (user == null) {
@@ -59,7 +60,7 @@ public class ForumController {
             }
             thread.setAuthor(user.getNickname());
             threadDAO.createThread(thread);
-            return ResponseEntity.status(HttpStatus.CREATED).body(threadDAO.getThread(thread.getForum()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(thread);
         } catch (DuplicateKeyException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(threadDAO.getThread(thread.getForum()));
         }
@@ -77,8 +78,17 @@ public class ForumController {
     }
 
     @RequestMapping(value = "{slug}/threads", method = RequestMethod.GET)
-    public ResponseEntity getThreads(@PathVariable(name = "slug") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body(slug + ": ...{threads}");
+    public ResponseEntity getThreads(@PathVariable(name = "slug") String slug,
+                                     @RequestParam(value = "limit", defaultValue = "0") int limit,
+                                     @RequestParam(value = "since", defaultValue = "") String since,
+                                     @RequestParam(value = "desc", defaultValue = "false") boolean desc) {
+        ForumModel forum = forumDAO.getForum(slug);
+        if (forum == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find forum " + slug);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(threadDAO.getThreads(slug, limit, since, desc));
     }
 
     @RequestMapping(value = "{slug}/users", method = RequestMethod.GET)
