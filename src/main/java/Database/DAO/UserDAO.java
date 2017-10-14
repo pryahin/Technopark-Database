@@ -59,6 +59,9 @@ public class UserDAO {
     }
 
     public void updateUser(String nickname, UserUpdateModel user) {
+        if (user.getAbout() == null && user.getEmail() == null && user.getFullname() == null) {
+            return;
+        }
         StringBuilder sql = new StringBuilder().append("UPDATE users SET ");
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("nickname", nickname);
         if (user.getAbout() != null) {
