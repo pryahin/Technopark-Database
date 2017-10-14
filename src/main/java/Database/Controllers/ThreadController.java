@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/api/thread/")
 @RestController
-public class ThreadService {
+public class ThreadController {
 
     @RequestMapping(value = "/{slug_or_id}/create", method = RequestMethod.POST)
     public ResponseEntity createPost(@PathVariable(name="slug_or_id") String slug) {
