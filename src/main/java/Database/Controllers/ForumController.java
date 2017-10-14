@@ -1,38 +1,71 @@
 package Database.Controllers;
 
+import Database.DAO.ForumDAO;
+import Database.DAO.UserDAO;
+import Database.Models.ErrorModel;
+import Database.Models.ForumModel;
+import Database.Models.UserModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/forum")
 @RestController
 public class ForumController {
 
+    private ForumDAO forumDAO;
+    private UserDAO userDAO;
+
+    @Autowired
+    public ForumController(ForumDAO forumDAO, UserDAO userDAO) {
+        this.forumDAO = forumDAO;
+        this.userDAO = userDAO;
+    }
+
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public ResponseEntity createForum() {
-        return ResponseEntity.status(HttpStatus.CREATED).body("Forum created");
+    public ResponseEntity createForum(@RequestBody ForumModel forum) {
+        forum.setPosts(0);
+        forum.setThreads(0);
+        try {
+            UserModel user = userDAO.getUser(forum.getUser());
+            if (user == null) {
+                ErrorModel error = new ErrorModel();
+                error.setMessage("Can't find user with nickname" + forum.getUser());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            }
+            forum.setUser(user.getNickname());
+            forumDAO.createForum(forum);
+            return ResponseEntity.status(HttpStatus.CREATED).body(forumDAO.getForum(forum.getSlug()));
+        } catch (DuplicateKeyException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(forumDAO.getForum(forum.getSlug()));
+        }
     }
 
     @RequestMapping(value = "/{slug}/create", method = RequestMethod.POST)
     public ResponseEntity createThread(@PathVariable(name = "slug") String slug) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(slug+" - created");
+        return ResponseEntity.status(HttpStatus.CREATED).body(slug + " - created");
     }
 
     @RequestMapping(value = "{slug}/details", method = RequestMethod.GET)
     public ResponseEntity getDetails(@PathVariable(name = "slug") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body(slug+": ...{details}");
+        ForumModel forum = forumDAO.getForum(slug);
+        if (forum == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find forum " + slug);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(forum);
     }
 
     @RequestMapping(value = "{slug}/threads", method = RequestMethod.GET)
     public ResponseEntity getThreads(@PathVariable(name = "slug") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body(slug+": ...{threads}");
+        return ResponseEntity.status(HttpStatus.OK).body(slug + ": ...{threads}");
     }
 
     @RequestMapping(value = "{slug}/users", method = RequestMethod.GET)
     public ResponseEntity getUsers(@PathVariable(name = "slug") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body(slug+" - users: ...");
+        return ResponseEntity.status(HttpStatus.OK).body(slug + " - users: ...");
     }
 }
