@@ -207,4 +207,10 @@ public class PostDAO {
 
         return this.namedParameterJdbcTemplate.query(sql, namedParameters, (rs, rowNum) -> rs.getInt("id"));
     }
+
+    public int getCount() {
+        String sql = "SELECT COUNT(*) FROM posts";
+        SqlParameterSource namedParameters = new MapSqlParameterSource();
+        return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+    }
 }

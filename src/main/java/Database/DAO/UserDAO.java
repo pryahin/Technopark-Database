@@ -69,4 +69,10 @@ public class UserDAO {
         this.namedParameterJdbcTemplate.update(sql.toString(), namedParameters);
     }
 
+    public int getCount() {
+        String sql = "SELECT COUNT(*) FROM users";
+        SqlParameterSource namedParameters = new MapSqlParameterSource();
+        return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+    }
+
 }

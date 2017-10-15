@@ -69,4 +69,10 @@ public class ForumDAO {
         return this.namedParameterJdbcTemplate.query(sql, namedParameters, new UserMapper());
     }
 
+    public int getCount() {
+        String sql = "SELECT COUNT(*) FROM forums";
+        SqlParameterSource namedParameters = new MapSqlParameterSource();
+        return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+    }
+
 }

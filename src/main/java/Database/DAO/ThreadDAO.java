@@ -103,4 +103,10 @@ public class ThreadDAO {
         List<ThreadModel> threads = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
         return threads;
     }
+
+    public int getCount() {
+        String sql = "SELECT COUNT(*) FROM threads";
+        SqlParameterSource namedParameters = new MapSqlParameterSource();
+        return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+    }
 }
