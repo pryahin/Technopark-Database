@@ -27,9 +27,6 @@ public class PostDAO {
             if (post.getCreated() == null) {
                 post.setCreated(TimestampHelper.fromTimestamp(created));
             }
-            String sql = "INSERT INTO posts(author, created, forum, message, parent, thread)" +
-                    "VALUES (:author, :created, :forum, :message, :parent, :thread) " +
-                    "RETURNING *";
 
             MapSqlParameterSource namedParameters = new MapSqlParameterSource("author", post.getAuthor())
                     .addValue("created", TimestampHelper.toTimestamp(post.getCreated()))
@@ -37,6 +34,12 @@ public class PostDAO {
                     .addValue("message", post.getMessage())
                     .addValue("parent", post.getParent())
                     .addValue("thread", post.getThread());
+
+            post.setId(this.namedParameterJdbcTemplate.queryForObject("SELECT nextval(pg_get_serial_sequence('posts', 'id'))", namedParameters, Integer.class));
+            namedParameters.addValue("id", post.getId());
+            String sql = "INSERT INTO posts(id, author, created, forum, message, parent, thread, path)" +
+                    "VALUES (:id, :author, :created, :forum, :message, :parent, :thread, array_append((SELECT path FROM posts WHERE id = :parent), :id))" +
+                    "RETURNING *";
 
             List<PostModel> result = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
             post.setId(result.get(0).getId());
@@ -100,7 +103,29 @@ public class PostDAO {
     }
 
     private List<PostModel> treeSort(int thread, int limit, String since, boolean desc) {
-        return null;
+        String sql = "SELECT * FROM posts " +
+                "WHERE thread = :thread ";
+
+        if (!since.isEmpty()) {
+            if (desc) {
+                sql += " AND created < :created";
+            } else {
+                sql += " AND created > :created";
+            }
+        }
+        if (desc) {
+            sql += "ORDER BY path DESC";
+        } else {
+            sql += "ORDER BY path";
+        }
+        if (limit != 0) {
+            sql += " LIMIT " + limit;
+        }
+
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
+                .addValue("created", since.isEmpty() ? null : TimestampHelper.toTimestamp(since));
+
+        return this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
     }
 
     private List<PostModel> parentTreeSort(int thread, int limit, String since, boolean desc) {

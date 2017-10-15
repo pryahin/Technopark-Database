@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS posts (
   isEdited BOOLEAN NOT NULL DEFAULT FALSE,
   message  TEXT    NOT NULL,
   parent   BIGINT  NOT NULL,
-  thread   INTEGER NOT NULL
+  thread   INTEGER NOT NULL,
+  path     INT ARRAY
 );
 
 DROP TABLE IF EXISTS votes;
