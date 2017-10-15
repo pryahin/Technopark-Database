@@ -38,4 +38,9 @@ public class VoteDAO {
         return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
     }
 
+    public void clearTable() {
+        String sql = "TRUNCATE TABLE votes CASCADE";
+        SqlParameterSource namedParameters = new MapSqlParameterSource();
+        this.namedParameterJdbcTemplate.update(sql, namedParameters);
+    }
 }

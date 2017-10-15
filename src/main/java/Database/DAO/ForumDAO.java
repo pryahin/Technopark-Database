@@ -75,4 +75,9 @@ public class ForumDAO {
         return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
     }
 
+    public void clearTable() {
+        String sql = "TRUNCATE TABLE forums CASCADE";
+        SqlParameterSource namedParameters = new MapSqlParameterSource();
+        this.namedParameterJdbcTemplate.update(sql, namedParameters);
+    }
 }
