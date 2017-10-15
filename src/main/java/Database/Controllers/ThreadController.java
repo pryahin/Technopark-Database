@@ -78,8 +78,19 @@ public class ThreadController {
     }
 
     @RequestMapping(value = "/{slug_or_id}/posts", method = RequestMethod.GET)
-    public ResponseEntity getPosts(@PathVariable(name="slug_or_id") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body("[Posts] from "+slug);
+    public ResponseEntity getPosts(@PathVariable(name="slug_or_id") String slug,
+                                   @RequestParam(value = "limit", defaultValue = "0") int limit,
+                                   @RequestParam(value = "since", defaultValue = "") String since,
+                                   @RequestParam(value = "sort", defaultValue = "flat") String sort,
+                                   @RequestParam(value = "desc", defaultValue = "false") boolean desc) {
+
+        ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
+        if (thread == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find thread " + slug);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(postDAO.getPosts(thread.getId(), limit, since, sort, desc));
     }
 
     @RequestMapping(value = "/{slug_or_id}/vote", method = RequestMethod.POST)

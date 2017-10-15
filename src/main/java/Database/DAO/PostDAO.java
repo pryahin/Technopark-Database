@@ -47,8 +47,63 @@ public class PostDAO {
         String sql = "SELECT * FROM posts " +
                 "WHERE id = :id";
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("id", id);
-        List<PostModel> posts =  this.namedParameterJdbcTemplate.query(sql,namedParameters, new PostMapper());
+        List<PostModel> posts = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
 
         return posts.isEmpty() ? null : posts.get(0);
+    }
+
+    public List<PostModel> getPosts(int thread, int limit, String since, String sort, boolean desc) {
+        List<PostModel> posts = null;
+        switch (sort) {
+            case "flat": {
+                posts = flatSort(thread, limit, since, desc);
+                break;
+            }
+            case "tree": {
+                posts = treeSort(thread, limit, since, desc);
+                break;
+            }
+            case "parent_tree": {
+                posts = parentTreeSort(thread, limit, since, desc);
+                break;
+            }
+            default:
+                break;
+        }
+        return posts;
+    }
+
+    private List<PostModel> flatSort(int thread, int limit, String since, boolean desc) {
+        String sql = "SELECT * FROM posts " +
+                "WHERE thread = :thread";
+        if (!since.isEmpty()) {
+            if (desc) {
+                sql += " AND created <= :created";
+            } else {
+                sql += " AND created >= :created";
+            }
+        }
+        if (desc) {
+            sql += " ORDER BY created DESC";
+        } else {
+            sql += " ORDER BY created";
+        }
+
+        if (limit != 0) {
+            sql += " LIMIT " + limit;
+        }
+
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
+                .addValue("created", since.isEmpty() ? null : TimestampHelper.toTimestamp(since));
+
+        return this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
+    }
+
+    private List<PostModel> treeSort(int thread, int limit, String since, boolean desc) {
+        return null;
+    }
+
+    private List<PostModel> parentTreeSort(int thread, int limit, String since, boolean desc) {
+        return null;
     }
 }
