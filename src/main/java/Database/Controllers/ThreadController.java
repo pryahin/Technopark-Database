@@ -48,6 +48,11 @@ public class ThreadController {
                         error.setMessage("Can't find parent with if " + post.getParent());
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
                     }
+                    if (parent.getThread() != thread.getId()) {
+                        ErrorModel error = new ErrorModel();
+                        error.setMessage("Parent post was created in another thread");
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+                    }
                 }
 
                 post.setForum(thread.getForum());
