@@ -23,14 +23,10 @@ public class PostDAO {
     public void createPost(List<PostModel> posts) {
         for (PostModel post : posts) {
             boolean hasCreated = post.getCreated() != null;
-            System.out.println(post.getCreated());
-            System.out.println(hasCreated);
             String sql = "INSERT INTO posts(author, " + (hasCreated ? "created," : " " ) + " forum, message, parent, thread)" +
                     "VALUES (:author, " + (hasCreated ? ":created," : " ") + " :forum, :message, :parent, :thread) " +
                     "RETURNING *";
-
-            System.out.println(sql);
-
+            
             MapSqlParameterSource namedParameters = new MapSqlParameterSource("author", post.getAuthor())
                     .addValue("created", hasCreated ? TimestampHelper.toTimestamp(post.getCreated()) : null)
                     .addValue("forum", post.getForum())

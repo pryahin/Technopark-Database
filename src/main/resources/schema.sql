@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS threads (
   forum   TEXT   NOT NULL,
   id      SERIAL PRIMARY KEY,
   message TEXT   NOT NULL,
-  slug    TEXT UNIQUE,
+  slug    CITEXT UNIQUE,
   title   TEXT   NOT NULL,
   votes   INTEGER
 );
