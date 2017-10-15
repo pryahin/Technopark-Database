@@ -97,7 +97,17 @@ public class ForumController {
     }
 
     @RequestMapping(value = "{slug}/users", method = RequestMethod.GET)
-    public ResponseEntity getUsers(@PathVariable(name = "slug") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body(slug + " - users: ...");
+    public ResponseEntity getUsers(@PathVariable(name = "slug") String slug,
+                                   @RequestParam(value = "limit", defaultValue = "0") int limit,
+                                   @RequestParam(value = "since", defaultValue = "") String since,
+                                   @RequestParam(value = "desc", defaultValue = "false") boolean desc) {
+        ForumModel forum = forumDAO.getForum(slug);
+        if (forum == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find forum " + slug);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(forumDAO.getUsers(slug, limit, since, desc));
     }
 }
