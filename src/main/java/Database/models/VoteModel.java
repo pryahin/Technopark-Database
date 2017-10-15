@@ -15,13 +15,10 @@ public class VoteModel {
     @JsonCreator
     VoteModel(
             @JsonProperty("nickname") String nickname,
-            @JsonProperty("voice") int voice,
-            @JsonProperty("thread") int thread
+            @JsonProperty("voice") int voice
     ) {
         this.nickname = nickname;
         this.voice = voice;
-        this.thread = thread;
-
     }
 
     public VoteModel() {

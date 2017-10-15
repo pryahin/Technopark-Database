@@ -3,10 +3,8 @@ package Database.Controllers;
 import Database.DAO.PostDAO;
 import Database.DAO.ThreadDAO;
 import Database.DAO.UserDAO;
-import Database.Models.ErrorModel;
-import Database.Models.PostModel;
-import Database.Models.ThreadModel;
-import Database.Models.UserModel;
+import Database.DAO.VoteDAO;
+import Database.Models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -22,12 +20,14 @@ public class ThreadController {
     private ThreadDAO threadDAO;
     private PostDAO postDAO;
     private UserDAO userDAO;
+    private VoteDAO voteDAO;
 
     @Autowired
-    public ThreadController(ThreadDAO threadDAO, PostDAO postDAO, UserDAO userDAO) {
+    public ThreadController(ThreadDAO threadDAO, PostDAO postDAO, UserDAO userDAO, VoteDAO voteDAO) {
         this.threadDAO = threadDAO;
         this.postDAO = postDAO;
         this.userDAO = userDAO;
+        this.voteDAO = voteDAO;
     }
 
     @RequestMapping(value = "/{slug_or_id}/create", method = RequestMethod.POST)
@@ -41,13 +41,6 @@ public class ThreadController {
             }
 
             for (PostModel post : posts ) {
-                UserModel user = userDAO.getUser(thread.getAuthor());
-                if (user == null) {
-                    ErrorModel error = new ErrorModel();
-                    error.setMessage("Can't find user with nickname" + thread.getAuthor());
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-                }
-
                 if (post.getParent() != 0) {
                     PostModel parent = postDAO.getPost(post.getParent());
                     if (parent == null) {
@@ -84,7 +77,16 @@ public class ThreadController {
     }
 
     @RequestMapping(value = "/{slug_or_id}/vote", method = RequestMethod.POST)
-    public ResponseEntity vote(@PathVariable(name="slug_or_id") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body("vote "+slug);
+    public ResponseEntity vote(@PathVariable(name="slug_or_id") String slug, @RequestBody VoteModel vote) {
+        ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
+        if (thread == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find thread " + slug);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+        vote.setThread(thread.getId());
+        thread.setVotes(voteDAO.vote(vote));
+        return ResponseEntity.status(HttpStatus.OK).body(thread);
     }
 }

@@ -46,5 +46,6 @@ CREATE TABLE IF NOT EXISTS votes (
   id       SERIAL PRIMARY KEY,
   nickname CITEXT   NOT NULL,
   voice    SMALLINT NOT NULL,
-  thread   INTEGER  NOT NULL
+  thread   INTEGER  NOT NULL,
+  UNIQUE (nickname, thread)
 );
