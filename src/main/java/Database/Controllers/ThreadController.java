@@ -63,7 +63,13 @@ public class ThreadController {
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.GET)
     public ResponseEntity getThread(@PathVariable(name="slug_or_id") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body("get "+slug+" thread");
+        ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
+        if (thread == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find thread " + slug);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(thread);
     }
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.POST)
