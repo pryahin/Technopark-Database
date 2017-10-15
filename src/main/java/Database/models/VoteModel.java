@@ -10,14 +10,18 @@ public class VoteModel {
 
     private String nickname;
     private int voice;
+    private int thread;
 
     @JsonCreator
     VoteModel(
             @JsonProperty("nickname") String nickname,
-            @JsonProperty("voice") int voice
+            @JsonProperty("voice") int voice,
+            @JsonProperty("thread") int thread
     ) {
         this.nickname = nickname;
         this.voice = voice;
+        this.thread = thread;
+
     }
 
     public VoteModel() {
@@ -37,5 +41,13 @@ public class VoteModel {
 
     public void setVoice(int voice) {
         this.voice = voice;
+    }
+
+    public int getThread() {
+        return thread;
+    }
+
+    public void setThread(int thread) {
+        this.thread = thread;
     }
 }
