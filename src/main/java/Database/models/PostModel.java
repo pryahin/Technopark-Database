@@ -70,7 +70,7 @@ public class PostModel {
         this.id = id;
     }
 
-    public boolean isEdited() {
+    public boolean getIsEdited() {
         return isEdited;
     }
 
