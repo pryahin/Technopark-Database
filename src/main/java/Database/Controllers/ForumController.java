@@ -62,7 +62,7 @@ public class ForumController {
             threadDAO.createThread(thread);
             return ResponseEntity.status(HttpStatus.CREATED).body(thread);
         } catch (DuplicateKeyException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(threadDAO.getThread(thread.getForum()));
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(threadDAO.getThreadBySlug(slug));
         }
     }
 

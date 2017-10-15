@@ -38,13 +38,30 @@ public class ThreadDAO {
         thread.setId(id);
     }
 
-    public ThreadModel getThread(String forum) {
+    public ThreadModel getThreadBySlug(String slug) {
         String sql = "SELECT * FROM threads " +
-                "WHERE LOWER(forum) = LOWER(:forum)";
-        SqlParameterSource namedParameters = new MapSqlParameterSource("forum", forum);
+                "WHERE LOWER(slug) = LOWER(:slug)";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("slug", slug);
         List<ThreadModel> threads = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
 
         return threads.isEmpty() ? null : threads.get(0);
+    }
+
+    public ThreadModel getThreadById(int id) {
+        String sql = "SELECT * FROM threads " +
+                "WHERE id = :id";
+        SqlParameterSource namedParameters = new MapSqlParameterSource("id", id);
+        List<ThreadModel> threads = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
+
+        return threads.isEmpty() ? null : threads.get(0);
+    }
+
+    public ThreadModel getThreadBySlugOrId(String slug) {
+        if (slug.matches("[-+]?\\d*\\.?\\d+")) {
+            return getThreadById(Integer.parseInt(slug));
+        } else {
+            return getThreadBySlug(slug);
+        }
     }
 
     public List<ThreadModel> getThreads(String forum, int limit, String since, boolean desc) {
