@@ -73,8 +73,22 @@ public class ThreadController {
     }
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.POST)
-    public ResponseEntity changeThread(@PathVariable(name="slug_or_id") String slug) {
-        return ResponseEntity.status(HttpStatus.OK).body("changed "+slug);
+    public ResponseEntity changeThread(@PathVariable(name="slug_or_id") String slug, @RequestBody ThreadUpdateModel threadUpdate) {
+        ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
+        if (thread == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find thread " + slug);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+        if (threadUpdate.getMessage() != null)
+            thread.setMessage(threadUpdate.getMessage());
+        if (threadUpdate.getTitle() != null)
+            thread.setTitle(threadUpdate.getTitle());
+
+        threadDAO.updateThread(thread);
+
+        return ResponseEntity.status(HttpStatus.OK).body(thread);
     }
 
     @RequestMapping(value = "/{slug_or_id}/posts", method = RequestMethod.GET)
