@@ -38,10 +38,12 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
-        if (postUpdate.getMessage() != null)
-            post.setMessage(postUpdate.getMessage());
-
-        postDAO.updatePost(post);
+        if (postUpdate.getMessage() != null) {
+            if (post.getMessage().compareTo(postUpdate.getMessage()) != 0) {
+                post.setMessage(postUpdate.getMessage());
+                postDAO.updatePost(post);
+            }
+        }
         return ResponseEntity.status(HttpStatus.OK).body(post);
     }
 
