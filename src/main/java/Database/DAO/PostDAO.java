@@ -2,10 +2,13 @@ package Database.DAO;
 
 import Database.Helpers.TimestampHelper;
 import Database.Mappers.PostMapper;
+import Database.Models.PostFullModel;
 import Database.Models.PostModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -59,6 +62,22 @@ public class PostDAO {
         List<PostModel> posts = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
 
         return posts.isEmpty() ? null : posts.get(0);
+    }
+
+    public PostFullModel getPostDetails(int id) {
+        PostFullModel details = new PostFullModel();
+        details.setPost(this.getPost(id));
+
+        return details;
+    }
+
+    public void updatePost(PostModel post) {
+        String sql = "UPDATE posts SET message = :message, isEdited = TRUE " +
+                "WHERE id = :id";
+        SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(post);
+
+        this.namedParameterJdbcTemplate.update(sql, namedParameters);
+        post.setEdited(true);
     }
 
     public List<PostModel> getPosts(int thread, int limit, int since, String sort, boolean desc) {
