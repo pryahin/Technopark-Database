@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -55,7 +56,7 @@ public class PostDAO {
         return posts.isEmpty() ? null : posts.get(0);
     }
 
-    public List<PostModel> getPosts(int thread, int limit, String since, String sort, boolean desc) {
+    public List<PostModel> getPosts(int thread, int limit, int since, String sort, boolean desc) {
         List<PostModel> posts = null;
         switch (sort) {
             case "flat": {
@@ -76,20 +77,20 @@ public class PostDAO {
         return posts;
     }
 
-    private List<PostModel> flatSort(int thread, int limit, String since, boolean desc) {
+    private List<PostModel> flatSort(int thread, int limit, int since, boolean desc) {
         String sql = "SELECT * FROM posts " +
                 "WHERE thread = :thread";
-        if (!since.isEmpty()) {
+        if (since!=-1) {
             if (desc) {
-                sql += " AND created <= :created";
+                sql += " AND id < :since ";
             } else {
-                sql += " AND created >= :created";
+                sql += " AND id > :since ";
             }
         }
         if (desc) {
-            sql += " ORDER BY created DESC";
+            sql += " ORDER BY created DESC, id DESC ";
         } else {
-            sql += " ORDER BY created";
+            sql += " ORDER BY created ASC, id ASC";
         }
 
         if (limit != 0) {
@@ -97,38 +98,89 @@ public class PostDAO {
         }
 
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
-                .addValue("created", since.isEmpty() ? null : TimestampHelper.toTimestamp(since));
+                .addValue("since", since);
 
         return this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
     }
 
-    private List<PostModel> treeSort(int thread, int limit, String since, boolean desc) {
+    private List<PostModel> treeSort(int thread, int limit, int since, boolean desc) {
         String sql = "SELECT * FROM posts " +
                 "WHERE thread = :thread ";
 
-        if (!since.isEmpty()) {
+        if (since!=-1) {
             if (desc) {
-                sql += " AND created < :created";
+                sql += " AND path < (SELECT path FROM posts WHERE id = :since)";
             } else {
-                sql += " AND created > :created";
+                sql += " AND path > (SELECT path FROM posts WHERE id = :since) ";
             }
         }
         if (desc) {
-            sql += "ORDER BY path DESC";
+            sql += " ORDER BY path DESC ";
         } else {
-            sql += "ORDER BY path";
+            sql += " ORDER BY path ASC ";
         }
         if (limit != 0) {
             sql += " LIMIT " + limit;
         }
 
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
-                .addValue("created", since.isEmpty() ? null : TimestampHelper.toTimestamp(since));
+                .addValue("since", since);
 
         return this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
     }
 
-    private List<PostModel> parentTreeSort(int thread, int limit, String since, boolean desc) {
-        return null;
+    private List<PostModel> parentTreeSort(int thread, int limit, int since, boolean desc) {
+        List<Integer> parents = getParents(thread, limit, since, desc);
+        String sql = "SELECT * FROM posts " +
+                "WHERE thread = :thread AND path[1] = :parent ";
+
+        if (since!=-1) {
+            if (desc) {
+                sql += " AND path[1] < (SELECT path[1] FROM posts WHERE id = :since)";
+            } else {
+                sql += " AND path[1] > (SELECT path[1] FROM posts WHERE id = :since) ";
+            }
+        }
+        if (desc) {
+            sql += " ORDER BY path DESC, id DESC ";
+        } else {
+            sql += " ORDER BY path, id ASC ";
+        }
+
+        List<PostModel> posts = new ArrayList<>();
+        for (int parent: parents) {
+            MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
+                    .addValue("since", since)
+                    .addValue("parent", parent);
+            posts.addAll(this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper()));
+        }
+
+        return posts;
+    }
+
+    private List<Integer> getParents(int thread, int limit, int since, boolean desc) {
+        String sql = "SELECT id FROM posts " +
+                "WHERE thread = :thread AND parent = 0 ";
+
+        if (since!=-1) {
+            if (desc) {
+                sql += " AND path[1] < (SELECT path[1] FROM posts WHERE id = :since)";
+            } else {
+                sql += " AND path[1] > (SELECT path[1] FROM posts WHERE id = :since) ";
+            }
+        }
+        if (desc) {
+            sql += " ORDER BY id DESC ";
+        } else {
+            sql += " ORDER BY id ASC ";
+        }
+        if (limit != 0) {
+            sql += " LIMIT " + limit;
+        }
+
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
+                .addValue("since", since);
+
+        return this.namedParameterJdbcTemplate.query(sql, namedParameters, (rs, rowNum) -> rs.getInt("id"));
     }
 }

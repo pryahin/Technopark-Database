@@ -80,7 +80,7 @@ public class ThreadController {
     @RequestMapping(value = "/{slug_or_id}/posts", method = RequestMethod.GET)
     public ResponseEntity getPosts(@PathVariable(name="slug_or_id") String slug,
                                    @RequestParam(value = "limit", defaultValue = "0") int limit,
-                                   @RequestParam(value = "since", defaultValue = "") String since,
+                                   @RequestParam(value = "since", defaultValue = "-1") int since,
                                    @RequestParam(value = "sort", defaultValue = "flat") String sort,
                                    @RequestParam(value = "desc", defaultValue = "false") boolean desc) {
 
