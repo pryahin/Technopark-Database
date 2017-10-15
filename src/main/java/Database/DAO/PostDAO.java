@@ -44,6 +44,11 @@ public class PostDAO {
 
             List<PostModel> result = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
             post.setId(result.get(0).getId());
+
+            sql = "UPDATE forums " +
+                    "SET posts = (SELECT COUNT(*) FROM posts WHERE forum = :forum) " +
+                    "WHERE LOWER(slug) = LOWER(:forum) ";
+            this.namedParameterJdbcTemplate.update(sql, namedParameters);
         }
     }
 

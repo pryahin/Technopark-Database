@@ -4,6 +4,7 @@ import Database.Helpers.TimestampHelper;
 import Database.Mappers.ThreadMapper;
 import Database.Models.ThreadModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -36,6 +37,11 @@ public class ThreadDAO {
                 .addValue("votes", thread.getVotes());
         final int id = this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
         thread.setId(id);
+
+        sql = "UPDATE forums " +
+                "SET threads = (SELECT COUNT(*) FROM threads WHERE forum = :forum) " +
+                "WHERE LOWER(slug) = LOWER(:forum) ";
+        this.namedParameterJdbcTemplate.update(sql, namedParameters);
     }
 
     public ThreadModel getThreadBySlug(String slug) {
@@ -62,6 +68,14 @@ public class ThreadDAO {
         } else {
             return getThreadBySlug(slug);
         }
+    }
+
+    public void updateThread(ThreadModel thread) {
+        String sql = "UPDATE threads SET message = :message, title = :title " +
+                "WHERE id = :id";
+        SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(thread);
+
+        this.namedParameterJdbcTemplate.update(sql, namedParameters);
     }
 
     public List<ThreadModel> getThreads(String forum, int limit, String since, boolean desc) {
