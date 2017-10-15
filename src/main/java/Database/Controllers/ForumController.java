@@ -50,6 +50,11 @@ public class ForumController {
     @RequestMapping(value = "/{slug}/create", method = RequestMethod.POST)
     public ResponseEntity createThread(@PathVariable(name = "slug") String slug, @RequestBody ThreadModel thread) {
         ForumModel forum = forumDAO.getForum(slug);
+        if (forum == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find thread forum by slug: " + slug);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
         thread.setForum(forum.getSlug());
         try {
             UserModel user = userDAO.getUser(thread.getAuthor());
