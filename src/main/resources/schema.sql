@@ -28,3 +28,15 @@ CREATE TABLE IF NOT EXISTS threads (
   title   TEXT   NOT NULL,
   votes   INTEGER
 );
+
+DROP TABLE IF EXISTS posts;
+CREATE TABLE IF NOT EXISTS posts (
+  author   CITEXT  NOT NULL,
+  created  TIMESTAMP DEFAULT current_timestamp,
+  forum    TEXT    NOT NULL,
+  id       SERIAL PRIMARY KEY,
+  isEdited BOOLEAN NOT NULL DEFAULT FALSE,
+  message  TEXT    NOT NULL,
+  parent   BIGINT  NOT NULL,
+  thread   INTEGER NOT NULL
+);
