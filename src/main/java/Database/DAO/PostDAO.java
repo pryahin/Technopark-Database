@@ -2,7 +2,6 @@ package Database.DAO;
 
 import Database.Helpers.TimestampHelper;
 import Database.Mappers.PostMapper;
-import Database.Models.PostFullModel;
 import Database.Models.PostModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -62,13 +61,6 @@ public class PostDAO {
         List<PostModel> posts = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
 
         return posts.isEmpty() ? null : posts.get(0);
-    }
-
-    public PostFullModel getPostDetails(int id) {
-        PostFullModel details = new PostFullModel();
-        details.setPost(this.getPost(id));
-
-        return details;
     }
 
     public void updatePost(PostModel post) {
