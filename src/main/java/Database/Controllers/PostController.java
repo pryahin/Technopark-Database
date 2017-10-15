@@ -58,7 +58,7 @@ public class PostController {
 
         if (related != null) {
             if (related.contains("user")) {
-                postFullModel.setUser(userDAO.getUser(postFullModel.getPost().getAuthor()));
+                postFullModel.setAuthor(userDAO.getUser(postFullModel.getPost().getAuthor()));
             }
             if (related.contains("forum")) {
                 postFullModel.setForum(forumDAO.getForum(postFullModel.getPost().getForum()));
