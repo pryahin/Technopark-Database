@@ -127,6 +127,13 @@ public class ThreadController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
+        UserModel author = userDAO.getUser(vote.getNickname());
+        if (author == null) {
+            ErrorModel error = new ErrorModel();
+            error.setMessage("Can't find post author by nickname: " + vote.getNickname());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
         vote.setThread(thread.getId());
         thread.setVotes(voteDAO.vote(vote));
         return ResponseEntity.status(HttpStatus.OK).body(thread);
