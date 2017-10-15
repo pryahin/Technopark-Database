@@ -54,6 +54,12 @@ public class ThreadController {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
                     }
                 }
+                UserModel author = userDAO.getUser(post.getAuthor());
+                if (author == null) {
+                    ErrorModel error = new ErrorModel();
+                    error.setMessage("Can't find post author by nickname: " + post.getAuthor());
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+                }
 
                 post.setForum(thread.getForum());
                 post.setThread(thread.getId());
