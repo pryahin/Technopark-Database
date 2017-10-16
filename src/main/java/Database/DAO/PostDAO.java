@@ -58,9 +58,9 @@ public class PostDAO {
         String sql = "SELECT * FROM posts " +
                 "WHERE id = :id";
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("id", id);
-        List<PostModel> posts = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
+        List<PostModel> postList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
 
-        return posts.isEmpty() ? null : posts.get(0);
+        return postList.isEmpty() ? null : postList.get(0);
     }
 
     public void updatePost(PostModel post) {
@@ -96,7 +96,7 @@ public class PostDAO {
     private List<PostModel> flatSort(int thread, int limit, int since, boolean desc) {
         String sql = "SELECT * FROM posts " +
                 "WHERE thread = :thread";
-        if (since!=-1) {
+        if (since != -1) {
             if (desc) {
                 sql += " AND id < :since ";
             } else {
@@ -106,7 +106,7 @@ public class PostDAO {
         if (desc) {
             sql += " ORDER BY created DESC, id DESC ";
         } else {
-            sql += " ORDER BY created ASC, id ASC";
+            sql += " ORDER BY created ASC, id ASC ";
         }
 
         if (limit != 0) {
@@ -123,9 +123,9 @@ public class PostDAO {
         String sql = "SELECT * FROM posts " +
                 "WHERE thread = :thread ";
 
-        if (since!=-1) {
+        if (since != -1) {
             if (desc) {
-                sql += " AND path < (SELECT path FROM posts WHERE id = :since)";
+                sql += " AND path < (SELECT path FROM posts WHERE id = :since) ";
             } else {
                 sql += " AND path > (SELECT path FROM posts WHERE id = :since) ";
             }
@@ -150,9 +150,9 @@ public class PostDAO {
         String sql = "SELECT * FROM posts " +
                 "WHERE thread = :thread AND path[1] = :parent ";
 
-        if (since!=-1) {
+        if (since != -1) {
             if (desc) {
-                sql += " AND path[1] < (SELECT path[1] FROM posts WHERE id = :since)";
+                sql += " AND path[1] < (SELECT path[1] FROM posts WHERE id = :since) ";
             } else {
                 sql += " AND path[1] > (SELECT path[1] FROM posts WHERE id = :since) ";
             }
@@ -160,11 +160,11 @@ public class PostDAO {
         if (desc) {
             sql += " ORDER BY path DESC, id DESC ";
         } else {
-            sql += " ORDER BY path, id ASC ";
+            sql += " ORDER BY path ASC, id ASC ";
         }
 
         List<PostModel> posts = new ArrayList<>();
-        for (int parent: parents) {
+        for (int parent : parents) {
             MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
                     .addValue("since", since)
                     .addValue("parent", parent);
@@ -178,9 +178,9 @@ public class PostDAO {
         String sql = "SELECT id FROM posts " +
                 "WHERE thread = :thread AND parent = 0 ";
 
-        if (since!=-1) {
+        if (since != -1) {
             if (desc) {
-                sql += " AND path[1] < (SELECT path[1] FROM posts WHERE id = :since)";
+                sql += " AND path[1] < (SELECT path[1] FROM posts WHERE id = :since) ";
             } else {
                 sql += " AND path[1] > (SELECT path[1] FROM posts WHERE id = :since) ";
             }

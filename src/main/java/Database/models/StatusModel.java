@@ -11,7 +11,7 @@ public class StatusModel {
     private int user;
 
     @JsonCreator
-    StatusModel(
+    public StatusModel(
             @JsonProperty("forum") int forum,
             @JsonProperty("post") int post,
             @JsonProperty("thread") int thread,

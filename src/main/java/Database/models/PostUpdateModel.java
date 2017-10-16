@@ -8,7 +8,7 @@ public class PostUpdateModel {
     private String message;
 
     @JsonCreator
-    PostUpdateModel(
+    public PostUpdateModel(
             @JsonProperty("message") String message
     ) {
         this.message = message;

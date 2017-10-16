@@ -33,8 +33,7 @@ public class PostController {
     public ResponseEntity changePost(@PathVariable(name = "id") int id, @RequestBody PostUpdateModel postUpdate) {
         PostModel post = postDAO.getPost(id);
         if (post == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find post with id " + id);
+            ErrorModel error = new ErrorModel("Can't find post with id " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
@@ -53,8 +52,7 @@ public class PostController {
         postFullModel.setPost(postDAO.getPost(id));
 
         if (postFullModel.getPost() == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find post with id: " + id);
+            ErrorModel error = new ErrorModel("Can't find post with id: " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
@@ -72,5 +70,4 @@ public class PostController {
 
         return ResponseEntity.status(HttpStatus.OK).body(postFullModel);
     }
-
 }

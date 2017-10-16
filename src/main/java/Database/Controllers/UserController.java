@@ -39,8 +39,7 @@ public class UserController {
     public ResponseEntity getUser(@PathVariable(name = "nickname") String nickname) {
         UserModel user = userDAO.getUser(nickname);
         if (user == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find user with nickname " + nickname);
+            ErrorModel error = new ErrorModel("Can't find user with nickname " + nickname);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
         return ResponseEntity.status(HttpStatus.OK).body(user);
@@ -50,8 +49,7 @@ public class UserController {
     public ResponseEntity changeUser(@PathVariable(name = "nickname") String nickname, @RequestBody UserUpdateModel user) {
 
         if (userDAO.getUser(nickname) == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find user with nickname " + nickname);
+            ErrorModel error = new ErrorModel("Can't find user with nickname " + nickname);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
@@ -59,10 +57,8 @@ public class UserController {
             userDAO.updateUser(nickname, user);
             return ResponseEntity.status(HttpStatus.OK).body(userDAO.getUser(nickname));
         } catch (DuplicateKeyException ex) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("New user profile data conflicts with existing users");
+            ErrorModel error = new ErrorModel("New user profile data conflicts with existing users");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
         }
     }
-
 }

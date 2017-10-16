@@ -8,7 +8,7 @@ public class ErrorModel {
 
     @JsonCreator
     public ErrorModel(
-        @JsonProperty("message") String message
+            @JsonProperty("message") String message
     ) {
         this.message = message;
     }

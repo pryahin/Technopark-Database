@@ -31,33 +31,29 @@ public class ThreadController {
     }
 
     @RequestMapping(value = "/{slug_or_id}/create", method = RequestMethod.POST)
-    public ResponseEntity createPost(@PathVariable(name="slug_or_id") String slug, @RequestBody List<PostModel> posts) {
+    public ResponseEntity createPost(@PathVariable(name = "slug_or_id") String slug, @RequestBody List<PostModel> posts) {
         try {
             ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
             if (thread == null) {
-                ErrorModel error = new ErrorModel();
-                error.setMessage("Can't find thread " + slug);
+                ErrorModel error = new ErrorModel("Can't find thread " + slug);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
             }
 
-            for (PostModel post : posts ) {
+            for (PostModel post : posts) {
                 if (post.getParent() != 0) {
                     PostModel parent = postDAO.getPost(post.getParent());
                     if (parent == null) {
-                        ErrorModel error = new ErrorModel();
-                        error.setMessage("Can't find parent with if " + post.getParent());
+                        ErrorModel error = new ErrorModel("Can't find parent with id: " + post.getParent());
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
                     }
                     if (parent.getThread() != thread.getId()) {
-                        ErrorModel error = new ErrorModel();
-                        error.setMessage("Parent post was created in another thread");
+                        ErrorModel error = new ErrorModel("Parent post was created in another thread");
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
                     }
                 }
                 UserModel author = userDAO.getUser(post.getAuthor());
                 if (author == null) {
-                    ErrorModel error = new ErrorModel();
-                    error.setMessage("Can't find post author by nickname: " + post.getAuthor());
+                    ErrorModel error = new ErrorModel("Can't find post author by nickname: " + post.getAuthor());
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
                 }
 
@@ -73,22 +69,20 @@ public class ThreadController {
     }
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.GET)
-    public ResponseEntity getThread(@PathVariable(name="slug_or_id") String slug) {
+    public ResponseEntity getThread(@PathVariable(name = "slug_or_id") String slug) {
         ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
         if (thread == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find thread " + slug);
+            ErrorModel error = new ErrorModel("Can't find thread " + slug);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
         return ResponseEntity.status(HttpStatus.OK).body(thread);
     }
 
     @RequestMapping(value = "/{slug_or_id}/details", method = RequestMethod.POST)
-    public ResponseEntity changeThread(@PathVariable(name="slug_or_id") String slug, @RequestBody ThreadUpdateModel threadUpdate) {
+    public ResponseEntity changeThread(@PathVariable(name = "slug_or_id") String slug, @RequestBody ThreadUpdateModel threadUpdate) {
         ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
         if (thread == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find thread " + slug);
+            ErrorModel error = new ErrorModel("Can't find thread " + slug);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
@@ -103,7 +97,7 @@ public class ThreadController {
     }
 
     @RequestMapping(value = "/{slug_or_id}/posts", method = RequestMethod.GET)
-    public ResponseEntity getPosts(@PathVariable(name="slug_or_id") String slug,
+    public ResponseEntity getPosts(@PathVariable(name = "slug_or_id") String slug,
                                    @RequestParam(value = "limit", defaultValue = "0") int limit,
                                    @RequestParam(value = "since", defaultValue = "-1") int since,
                                    @RequestParam(value = "sort", defaultValue = "flat") String sort,
@@ -111,26 +105,23 @@ public class ThreadController {
 
         ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
         if (thread == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find thread " + slug);
+            ErrorModel error = new ErrorModel("Can't find thread " + slug);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
         return ResponseEntity.status(HttpStatus.OK).body(postDAO.getPosts(thread.getId(), limit, since, sort, desc));
     }
 
     @RequestMapping(value = "/{slug_or_id}/vote", method = RequestMethod.POST)
-    public ResponseEntity vote(@PathVariable(name="slug_or_id") String slug, @RequestBody VoteModel vote) {
+    public ResponseEntity vote(@PathVariable(name = "slug_or_id") String slug, @RequestBody VoteModel vote) {
         ThreadModel thread = threadDAO.getThreadBySlugOrId(slug);
         if (thread == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find thread " + slug);
+            ErrorModel error = new ErrorModel("Can't find thread " + slug);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
         UserModel author = userDAO.getUser(vote.getNickname());
         if (author == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find post author by nickname: " + vote.getNickname());
+            ErrorModel error = new ErrorModel("Can't find post author by nickname: " + vote.getNickname());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 

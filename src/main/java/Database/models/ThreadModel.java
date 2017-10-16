@@ -15,7 +15,7 @@ public class ThreadModel {
     private int votes;
 
     @JsonCreator
-    ThreadModel(
+    public ThreadModel(
             @JsonProperty("author") String author,
             @JsonProperty("created") String created,
             @JsonProperty("forum") String forum,

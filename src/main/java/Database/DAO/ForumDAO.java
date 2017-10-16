@@ -34,9 +34,9 @@ public class ForumDAO {
         String sql = "SELECT * FROM forums " +
                 "WHERE LOWER(slug) = LOWER(:slug)";
         SqlParameterSource namedParameters = new MapSqlParameterSource("slug", slug);
-        List<ForumModel> forums = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ForumMapper());
+        List<ForumModel> forumList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ForumMapper());
 
-        return forums.isEmpty() ? null : forums.get(0);
+        return forumList.isEmpty() ? null : forumList.get(0);
     }
 
     public List<UserModel> getUsers(String slug, int limit, String since, boolean desc) {
@@ -46,19 +46,11 @@ public class ForumDAO {
                 "FULL OUTER JOIN users u ON (t.author = u.nickname) OR (p.author = u.nickname) OR (f.user = u.nickname) " +
                 "WHERE LOWER(t.forum) = LOWER(:slug) ";
 
-            if (!since.isEmpty()) {
-            if (desc) {
-                sql += " AND LOWER(u.nickname) < LOWER(:since) ";
-            } else {
-                sql += " AND LOWER(u.nickname) > LOWER(:since) ";
-            }
+        if (!since.isEmpty()) {
+            sql += " AND LOWER(u.nickname) " + (desc ? "<" : ">") + " LOWER(:since) ";
         }
 
-        if (desc) {
-            sql += " ORDER BY u.nickname DESC ";
-        } else {
-            sql += " ORDER BY u.nickname ";
-        }
+        sql += " ORDER BY u.nickname " + (desc ? "DESC " : "ASC ");
 
         if (limit != 0) {
             sql += " LIMIT " + limit;

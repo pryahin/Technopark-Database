@@ -3,9 +3,6 @@ package Database.Models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by vova on 13.10.17.
- */
 public class UserModel {
 
     private String about;
@@ -14,7 +11,7 @@ public class UserModel {
     private String nickname;
 
     @JsonCreator
-    UserModel(
+    public UserModel(
             @JsonProperty("about") String about,
             @JsonProperty("email") String email,
             @JsonProperty("fullname") String fullname,

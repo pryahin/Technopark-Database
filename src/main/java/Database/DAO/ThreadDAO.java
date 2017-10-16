@@ -10,8 +10,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
-
 
 @Service
 public class ThreadDAO {
@@ -24,12 +24,16 @@ public class ThreadDAO {
     }
 
     public void createThread(ThreadModel thread) {
-        boolean hasCreated = thread.getCreated() == null;
-        String sql = "INSERT INTO threads(author, " + (hasCreated ? "" : "created,") +" forum, message, slug, title, votes)" +
-                "VALUES (:author, " + (hasCreated ? "" : ":created,") + " :forum, :message, :slug, :title, :votes) " +
+        final Timestamp created = new Timestamp(System.currentTimeMillis());
+        if (thread.getCreated() == null) {
+            thread.setCreated(TimestampHelper.fromTimestamp(created));
+        }
+
+        String sql = "INSERT INTO threads(author, created, forum, message, slug, title, votes)" +
+                "VALUES (:author, :created, :forum, :message, :slug, :title, :votes) " +
                 "RETURNING id";
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("author", thread.getAuthor())
-                .addValue("created", hasCreated ? null : TimestampHelper.toTimestamp(thread.getCreated()))
+                .addValue("created", TimestampHelper.toTimestamp(thread.getCreated()))
                 .addValue("forum", thread.getForum())
                 .addValue("message", thread.getMessage())
                 .addValue("slug", thread.getSlug())
@@ -48,18 +52,18 @@ public class ThreadDAO {
         String sql = "SELECT * FROM threads " +
                 "WHERE LOWER(slug) = LOWER(:slug)";
         SqlParameterSource namedParameters = new MapSqlParameterSource("slug", slug);
-        List<ThreadModel> threads = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
+        List<ThreadModel> threadList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
 
-        return threads.isEmpty() ? null : threads.get(0);
+        return threadList.isEmpty() ? null : threadList.get(0);
     }
 
     public ThreadModel getThreadById(int id) {
         String sql = "SELECT * FROM threads " +
                 "WHERE id = :id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("id", id);
-        List<ThreadModel> threads = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
+        List<ThreadModel> threadList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
 
-        return threads.isEmpty() ? null : threads.get(0);
+        return threadList.isEmpty() ? null : threadList.get(0);
     }
 
     public ThreadModel getThreadBySlugOrId(String slug) {
@@ -83,18 +87,18 @@ public class ThreadDAO {
                 "WHERE LOWER(forum) = LOWER(:forum) ";
         if (!since.isEmpty()) {
             if (desc) {
-                sql += " AND created <= :created";
+                sql += " AND created <= :created ";
             } else {
-                sql += " AND created >= :created";
+                sql += " AND created >= :created ";
             }
         }
         if (desc) {
-            sql += " ORDER BY created DESC";
+            sql += " ORDER BY created DESC ";
         } else {
-            sql += " ORDER BY created";
+            sql += " ORDER BY created ";
         }
 
-        if (limit!=0) {
+        if (limit != 0) {
             sql += " LIMIT " + limit;
         }
 

@@ -33,9 +33,9 @@ public class UserDAO {
         String sql = "SELECT * FROM users " +
                 "WHERE LOWER(nickname) = LOWER(:nickname)";
         SqlParameterSource namedParameters = new MapSqlParameterSource("nickname", nickname);
-        List<UserModel> users = this.namedParameterJdbcTemplate.query(sql, namedParameters, new UserMapper());
+        List<UserModel> userList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new UserMapper());
 
-        return users.isEmpty() ? null : users.get(0);
+        return userList.isEmpty() ? null : userList.get(0);
     }
 
     public List<UserModel> getUsers(String nickname, String email) {

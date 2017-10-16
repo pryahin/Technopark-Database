@@ -3,9 +3,6 @@ package Database.Models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by vova on 13.10.17.
- */
 public class VoteModel {
 
     private String nickname;
@@ -13,7 +10,7 @@ public class VoteModel {
     private int thread;
 
     @JsonCreator
-    VoteModel(
+    public VoteModel(
             @JsonProperty("nickname") String nickname,
             @JsonProperty("voice") int voice
     ) {

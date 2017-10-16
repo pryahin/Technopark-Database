@@ -3,9 +3,6 @@ package Database.Models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by vova on 13.10.17.
- */
 public class PostFullModel {
 
     private UserModel author;
@@ -14,7 +11,7 @@ public class PostFullModel {
     private ThreadModel thread;
 
     @JsonCreator
-    PostFullModel(
+    public PostFullModel(
             @JsonProperty("author") UserModel author,
             @JsonProperty("forum") ForumModel forum,
             @JsonProperty("post") PostModel post,

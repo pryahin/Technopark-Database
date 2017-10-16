@@ -35,8 +35,7 @@ public class ForumController {
         try {
             UserModel user = userDAO.getUser(forum.getUser());
             if (user == null) {
-                ErrorModel error = new ErrorModel();
-                error.setMessage("Can't find user with nickname" + forum.getUser());
+                ErrorModel error = new ErrorModel("Can't find user with nickname" + forum.getUser());
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
             }
             forum.setUser(user.getNickname());
@@ -51,16 +50,14 @@ public class ForumController {
     public ResponseEntity createThread(@PathVariable(name = "slug") String slug, @RequestBody ThreadModel thread) {
         ForumModel forum = forumDAO.getForum(slug);
         if (forum == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find thread forum by slug: " + slug);
+            ErrorModel error = new ErrorModel("Can't find thread forum by slug: " + slug);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
         thread.setForum(forum.getSlug());
         try {
             UserModel user = userDAO.getUser(thread.getAuthor());
             if (user == null) {
-                ErrorModel error = new ErrorModel();
-                error.setMessage("Can't find user with nickname" + thread.getAuthor());
+                ErrorModel error = new ErrorModel("Can't find user with nickname" + thread.getAuthor());
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
             }
             thread.setAuthor(user.getNickname());
@@ -75,8 +72,7 @@ public class ForumController {
     public ResponseEntity getDetails(@PathVariable(name = "slug") String slug) {
         ForumModel forum = forumDAO.getForum(slug);
         if (forum == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find forum " + slug);
+            ErrorModel error = new ErrorModel("Can't find forum " + slug);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
         return ResponseEntity.status(HttpStatus.OK).body(forum);
@@ -89,8 +85,7 @@ public class ForumController {
                                      @RequestParam(value = "desc", defaultValue = "false") boolean desc) {
         ForumModel forum = forumDAO.getForum(slug);
         if (forum == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find forum " + slug);
+            ErrorModel error = new ErrorModel("Can't find forum " + slug);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
         return ResponseEntity.status(HttpStatus.OK).body(threadDAO.getThreads(slug, limit, since, desc));
@@ -103,8 +98,7 @@ public class ForumController {
                                    @RequestParam(value = "desc", defaultValue = "false") boolean desc) {
         ForumModel forum = forumDAO.getForum(slug);
         if (forum == null) {
-            ErrorModel error = new ErrorModel();
-            error.setMessage("Can't find forum " + slug);
+            ErrorModel error = new ErrorModel("Can't find forum " + slug);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 

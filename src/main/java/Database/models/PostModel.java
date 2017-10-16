@@ -15,7 +15,7 @@ public class PostModel {
     private int thread;
 
     @JsonCreator
-    PostModel(
+    public PostModel(
             @JsonProperty("author") String author,
             @JsonProperty("created") String created,
             @JsonProperty("forum") String forum,

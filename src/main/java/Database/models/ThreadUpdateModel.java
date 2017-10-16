@@ -3,16 +3,13 @@ package Database.Models;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Created by vova on 13.10.17.
- */
 public class ThreadUpdateModel {
 
     private String message;
     private String title;
 
     @JsonCreator
-    ThreadUpdateModel(
+    public ThreadUpdateModel(
             @JsonProperty("message") String message,
             @JsonProperty("title") String title
     ) {
