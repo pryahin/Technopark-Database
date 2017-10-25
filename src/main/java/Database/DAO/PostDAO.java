@@ -34,9 +34,12 @@ public class PostDAO {
 
         String sql = "INSERT INTO posts(id, author, created, forum, message, parent, thread, path)" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, array_append((SELECT path FROM posts WHERE id = ?), ?))";
-
+        if (posts.isEmpty()) {
+            return;
+        }
         try(Connection con = this.jdbcTemplate.getDataSource().getConnection();
             PreparedStatement ps = con.prepareStatement(sql, Statement.NO_GENERATED_KEYS)) {
+
             for (PostModel post : posts) {
                 if (post.getCreated() == null) {
                     post.setCreated(TimestampHelper.fromTimestamp(created));
@@ -62,7 +65,7 @@ public class PostDAO {
                     "WHERE LOWER(slug) = LOWER(?) ";
             this.jdbcTemplate.update(sql, posts.size(), posts.get(0).getForum());
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
