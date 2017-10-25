@@ -4,53 +4,65 @@ import Database.Helpers.TimestampHelper;
 import Database.Mappers.PostMapper;
 import Database.Models.PostModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class PostDAO {
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public PostDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public PostDAO(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public void createPost(List<PostModel> posts) {
         final Timestamp created = new Timestamp(System.currentTimeMillis());
-        for (PostModel post : posts) {
-            if (post.getCreated() == null) {
-                post.setCreated(TimestampHelper.fromTimestamp(created));
+
+        String sql = "INSERT INTO posts(id, author, created, forum, message, parent, thread, path)" +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, array_append((SELECT path FROM posts WHERE id = ?), ?))";
+
+        try(Connection con = this.jdbcTemplate.getDataSource().getConnection();
+            PreparedStatement ps = con.prepareStatement(sql, Statement.NO_GENERATED_KEYS)) {
+            for (PostModel post : posts) {
+                if (post.getCreated() == null) {
+                    post.setCreated(TimestampHelper.fromTimestamp(created));
+                }
+
+                post.setId(this.jdbcTemplate.queryForObject("SELECT nextval(pg_get_serial_sequence('posts', 'id'))", Integer.class));
+
+                ps.setInt(1, post.getId());
+                ps.setString(2, post.getAuthor());
+                ps.setTimestamp(3, TimestampHelper.toTimestamp(post.getCreated()));
+                ps.setString(4, post.getForum());
+                ps.setString(5, post.getMessage());
+                ps.setInt(6, post.getParent());
+                ps.setInt(7, post.getThread());
+                ps.setInt(8, post.getParent());
+                ps.setInt(9, post.getId());
+                ps.addBatch();
             }
-
-            MapSqlParameterSource namedParameters = new MapSqlParameterSource("author", post.getAuthor())
-                    .addValue("created", TimestampHelper.toTimestamp(post.getCreated()))
-                    .addValue("forum", post.getForum())
-                    .addValue("message", post.getMessage())
-                    .addValue("parent", post.getParent())
-                    .addValue("thread", post.getThread());
-
-            post.setId(this.namedParameterJdbcTemplate.queryForObject("SELECT nextval(pg_get_serial_sequence('posts', 'id'))", namedParameters, Integer.class));
-            namedParameters.addValue("id", post.getId());
-            String sql = "INSERT INTO posts(id, author, created, forum, message, parent, thread, path)" +
-                    "VALUES (:id, :author, :created, :forum, :message, :parent, :thread, array_append((SELECT path FROM posts WHERE id = :parent), :id))" +
-                    "RETURNING *";
-
-            List<PostModel> result = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
-            post.setId(result.get(0).getId());
+            ps.executeBatch();
 
             sql = "UPDATE forums " +
-                    "SET posts = (SELECT COUNT(*) FROM posts WHERE forum = :forum) " +
-                    "WHERE LOWER(slug) = LOWER(:forum) ";
-            this.namedParameterJdbcTemplate.update(sql, namedParameters);
+                    "SET posts = posts + ?" +
+                    "WHERE LOWER(slug) = LOWER(?) ";
+            this.jdbcTemplate.update(sql, posts.size(), posts.get(0).getForum());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
