@@ -20,6 +20,7 @@ public class VoteDAO {
     }
 
     public int vote(VoteModel vote) {
+        //long start = System.currentTimeMillis();
         SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(vote);
         try {
             String sql = "INSERT INTO votes(nickname, voice, thread)" +
@@ -35,12 +36,19 @@ public class VoteDAO {
                 "SET votes = (SELECT SUM(voice) FROM votes WHERE thread = :thread) " +
                 "WHERE id = :thread " +
                 "RETURNING votes";
-        return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+
+        int result = this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+        //long end = System.currentTimeMillis();
+        //System.out.println("VoteDAO: vote "+(end-start)+"ms");
+        return result;
     }
 
     public void clearTable() {
+        //long start = System.currentTimeMillis();
         String sql = "TRUNCATE TABLE votes CASCADE";
         SqlParameterSource namedParameters = new MapSqlParameterSource();
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
+        //long end = System.currentTimeMillis();
+        //System.out.println("VoteDAO: clearTable "+(end-start)+"ms");
     }
 }

@@ -23,30 +23,43 @@ public class UserDAO {
     }
 
     public void addUser(UserModel user) {
+        //long start = System.currentTimeMillis();
         String sql = "INSERT INTO users " +
                 "VALUES (:about, :email, :fullname, :nickname)";
         SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(user);
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
+        //long end = System.currentTimeMillis();
+        //System.out.println("UserDAO: addUser "+(end-start)+"ms");
     }
 
     public UserModel getUser(String nickname) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT * FROM users " +
                 "WHERE LOWER(nickname) = LOWER(:nickname)";
         SqlParameterSource namedParameters = new MapSqlParameterSource("nickname", nickname);
         List<UserModel> userList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new UserMapper());
 
+        //long end = System.currentTimeMillis();
+        //System.out.println("UserDAO: getUser "+(end-start)+"ms");
         return userList.isEmpty() ? null : userList.get(0);
     }
 
     public List<UserModel> getUsers(String nickname, String email) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT * FROM users " +
                 "WHERE LOWER(email) = LOWER(:email) OR LOWER(nickname) = LOWER(:nickname)";
         SqlParameterSource namedParameters = new MapSqlParameterSource("email", email).addValue("nickname", nickname);
-        return this.namedParameterJdbcTemplate.query(sql, namedParameters, new UserMapper());
+        List<UserModel> result = this.namedParameterJdbcTemplate.query(sql, namedParameters, new UserMapper());
+        //long end = System.currentTimeMillis();
+        //System.out.println("UserDAO: getUsers "+(end-start)+"ms");
+        return result;
     }
 
     public void updateUser(String nickname, UserUpdateModel user) {
+        //long start = System.currentTimeMillis();
         if (user.getAbout() == null && user.getEmail() == null && user.getFullname() == null) {
+            //long end = System.currentTimeMillis();
+            //System.out.println("UserDAO: updateUser "+(end-start)+"ms");
             return;
         }
         StringBuilder sql = new StringBuilder().append("UPDATE users SET ");
@@ -67,17 +80,26 @@ public class UserDAO {
         sql.append("WHERE (LOWER(nickname) = LOWER(:nickname));");
 
         this.namedParameterJdbcTemplate.update(sql.toString(), namedParameters);
+        //long end = System.currentTimeMillis();
+        //System.out.println("UserDAO: updateUser "+(end-start)+"ms");
     }
 
     public int getCount() {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT COUNT(*) FROM users";
         SqlParameterSource namedParameters = new MapSqlParameterSource();
-        return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+        int result = this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+        //long end = System.currentTimeMillis();
+        //System.out.println("UserDAO: getCount "+(end-start)+"ms");
+        return result;
     }
 
     public void clearTable() {
+        //long start = System.currentTimeMillis();
         String sql = "TRUNCATE TABLE users CASCADE";
         SqlParameterSource namedParameters = new MapSqlParameterSource();
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
+        //long end = System.currentTimeMillis();
+        //System.out.println("UserDAO: clearTable "+(end-start)+"ms");
     }
 }

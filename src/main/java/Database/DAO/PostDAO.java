@@ -30,15 +30,21 @@ public class PostDAO {
     }
 
     public void createPost(List<PostModel> posts) {
+        //long start = System.currentTimeMillis();
         final Timestamp created = new Timestamp(System.currentTimeMillis());
 
         String sql = "INSERT INTO posts(id, author, created, forum, message, parent, thread, path)" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, array_append((SELECT path FROM posts WHERE id = ?), ?))";
+        String sql_users = "INSERT INTO forumUsers(userNickname, forumSlug) " +
+                "VALUES (?, ?)";
         if (posts.isEmpty()) {
+            //long end = System.currentTimeMillis();
+            //System.out.println("PostDAO: createPost " + (end - start) + "ms");
             return;
         }
-        try(Connection con = this.jdbcTemplate.getDataSource().getConnection();
-            PreparedStatement ps = con.prepareStatement(sql, Statement.NO_GENERATED_KEYS)) {
+        try (Connection con = this.jdbcTemplate.getDataSource().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.NO_GENERATED_KEYS);
+             PreparedStatement ps_users = con.prepareStatement(sql_users, Statement.NO_GENERATED_KEYS)) {
 
             for (PostModel post : posts) {
                 if (post.getCreated() == null) {
@@ -57,37 +63,52 @@ public class PostDAO {
                 ps.setInt(8, post.getParent());
                 ps.setInt(9, post.getId());
                 ps.addBatch();
+
+                ps_users.setString(1, post.getAuthor());
+                ps_users.setString(2, post.getForum());
+                ps_users.addBatch();
             }
             ps.executeBatch();
+            ps_users.executeBatch();
 
             sql = "UPDATE forums " +
                     "SET posts = posts + ?" +
                     "WHERE LOWER(slug) = LOWER(?) ";
             this.jdbcTemplate.update(sql, posts.size(), posts.get(0).getForum());
+            //long end = System.currentTimeMillis();
+            //System.out.println("PostDAO: createPost " + (end - start) + "ms");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public PostModel getPost(int id) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT * FROM posts " +
                 "WHERE id = :id";
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("id", id);
         List<PostModel> postList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
 
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: getPost " + (end - start) + "ms");
         return postList.isEmpty() ? null : postList.get(0);
     }
 
     public void updatePost(PostModel post) {
+        //long start = System.currentTimeMillis();
         String sql = "UPDATE posts SET message = :message, isEdited = TRUE " +
                 "WHERE id = :id";
         SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(post);
 
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
         post.setEdited(true);
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: updatePost " + (end - start) + "ms");
+
     }
 
     public List<PostModel> getPosts(int thread, int limit, int since, String sort, boolean desc) {
+        //long start = System.currentTimeMillis();
         List<PostModel> posts = null;
         switch (sort) {
             case "flat": {
@@ -105,10 +126,14 @@ public class PostDAO {
             default:
                 break;
         }
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: getPosts " + (end - start) + "ms");
+
         return posts;
     }
 
     private List<PostModel> flatSort(int thread, int limit, int since, boolean desc) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT * FROM posts " +
                 "WHERE thread = :thread";
         if (since != -1) {
@@ -131,10 +156,14 @@ public class PostDAO {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
                 .addValue("since", since);
 
-        return this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
+        List<PostModel> result = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: flatSort " + (end - start) + "ms");
+        return result;
     }
 
     private List<PostModel> treeSort(int thread, int limit, int since, boolean desc) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT * FROM posts " +
                 "WHERE thread = :thread ";
 
@@ -157,10 +186,14 @@ public class PostDAO {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
                 .addValue("since", since);
 
-        return this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
+        List<PostModel> result = this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper());
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: treeSort " + (end - start) + "ms");
+        return result;
     }
 
     private List<PostModel> parentTreeSort(int thread, int limit, int since, boolean desc) {
+        //long start = System.currentTimeMillis();
         List<Integer> parents = getParents(thread, limit, since, desc);
         String sql = "SELECT * FROM posts " +
                 "WHERE thread = :thread AND path[1] = :parent ";
@@ -186,10 +219,14 @@ public class PostDAO {
             posts.addAll(this.namedParameterJdbcTemplate.query(sql, namedParameters, new PostMapper()));
         }
 
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: parentTreeSort " + (end - start) + "ms");
+
         return posts;
     }
 
     private List<Integer> getParents(int thread, int limit, int since, boolean desc) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT id FROM posts " +
                 "WHERE thread = :thread AND parent = 0 ";
 
@@ -212,18 +249,31 @@ public class PostDAO {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("thread", thread)
                 .addValue("since", since);
 
-        return this.namedParameterJdbcTemplate.query(sql, namedParameters, (rs, rowNum) -> rs.getInt("id"));
+
+        List<Integer> result = this.namedParameterJdbcTemplate.query(sql, namedParameters, (rs, rowNum) -> rs.getInt("id"));
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: getParents " + (end - start) + "ms");
+        return result;
     }
 
     public int getCount() {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT COUNT(*) FROM posts";
         SqlParameterSource namedParameters = new MapSqlParameterSource();
-        return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+
+        int result = this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: getCount " + (end - start) + "ms");
+        return result;
     }
 
     public void clearTable() {
+        //long start = System.currentTimeMillis();
         String sql = "TRUNCATE TABLE posts CASCADE";
         SqlParameterSource namedParameters = new MapSqlParameterSource();
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
+        //long end = System.currentTimeMillis();
+        //System.out.println("PostDAO: clearTable " + (end - start) + "ms");
+
     }
 }

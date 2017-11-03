@@ -23,20 +23,28 @@ public class ServiceDAO {
     }
 
     public StatusModel getStatus() {
+        //long start = System.currentTimeMillis();
         StatusModel status = new StatusModel();
         status.setForum(forumDAO.getCount());
         status.setPost(postDAO.getCount());
         status.setThread(threadDAO.getCount());
         status.setUser(userDAO.getCount());
 
+        //long end = System.currentTimeMillis();
+        //System.out.println("ServiceDAO: getStatus "+(end-start)+"ms");
+
         return status;
     }
 
     public void clearDB() {
+        //long start = System.currentTimeMillis();
         forumDAO.clearTable();
         postDAO.clearTable();
         threadDAO.clearTable();
         userDAO.clearTable();
         voteDAO.clearTable();
+        //long end = System.currentTimeMillis();
+        //System.out.println("ServiceDAO: clearDB "+(end-start)+"ms");
+
     }
 }

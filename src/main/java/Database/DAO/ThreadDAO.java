@@ -24,6 +24,7 @@ public class ThreadDAO {
     }
 
     public void createThread(ThreadModel thread) {
+        //long start = System.currentTimeMillis();
         final Timestamp created = new Timestamp(System.currentTimeMillis());
         if (thread.getCreated() == null) {
             thread.setCreated(TimestampHelper.fromTimestamp(created));
@@ -46,23 +47,36 @@ public class ThreadDAO {
                 "SET threads = (SELECT COUNT(*) FROM threads WHERE forum = :forum) " +
                 "WHERE LOWER(slug) = LOWER(:forum) ";
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
+
+        sql = "INSERT INTO forumUsers(userNickname, forumSlug) " +
+                "VALUES (:author, :forum)";
+        this.namedParameterJdbcTemplate.update(sql, namedParameters);
+
+        //long end = System.currentTimeMillis();
+        //System.out.println("ThreadDAO: createThread "+(end-start)+"ms");
     }
 
     public ThreadModel getThreadBySlug(String slug) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT * FROM threads " +
                 "WHERE LOWER(slug) = LOWER(:slug)";
         SqlParameterSource namedParameters = new MapSqlParameterSource("slug", slug);
         List<ThreadModel> threadList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
 
+        //long end = System.currentTimeMillis();
+        //System.out.println("ThreadDAO: getThreadBySlug "+(end-start)+"ms");
         return threadList.isEmpty() ? null : threadList.get(0);
     }
 
     public ThreadModel getThreadById(int id) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT * FROM threads " +
                 "WHERE id = :id";
         SqlParameterSource namedParameters = new MapSqlParameterSource("id", id);
         List<ThreadModel> threadList = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
 
+        //long end = System.currentTimeMillis();
+        //System.out.println("ThreadDAO: getThreadById "+(end-start)+"ms");
         return threadList.isEmpty() ? null : threadList.get(0);
     }
 
@@ -75,14 +89,18 @@ public class ThreadDAO {
     }
 
     public void updateThread(ThreadModel thread) {
+        //long start = System.currentTimeMillis();
         String sql = "UPDATE threads SET message = :message, title = :title " +
                 "WHERE id = :id";
         SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(thread);
 
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
+        //long end = System.currentTimeMillis();
+        //System.out.println("ThreadDAO: updateThread "+(end-start)+"ms");
     }
 
     public List<ThreadModel> getThreads(String forum, int limit, String since, boolean desc) {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT * FROM threads " +
                 "WHERE LOWER(forum) = LOWER(:forum) ";
         if (!since.isEmpty()) {
@@ -105,18 +123,28 @@ public class ThreadDAO {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource("forum", forum)
                 .addValue("created", since.isEmpty() ? null : TimestampHelper.toTimestamp(since));
         List<ThreadModel> threads = this.namedParameterJdbcTemplate.query(sql, namedParameters, new ThreadMapper());
+        //long end = System.currentTimeMillis();
+        //System.out.println("ThreadDAO: getThreads "+(end-start)+"ms");
         return threads;
     }
 
     public int getCount() {
+        //long start = System.currentTimeMillis();
         String sql = "SELECT COUNT(*) FROM threads";
         SqlParameterSource namedParameters = new MapSqlParameterSource();
-        return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+
+        int result = this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+        //long end = System.currentTimeMillis();
+        //System.out.println("ThreadDAO: getCount "+(end-start)+"ms");
+        return result;
     }
 
     public void clearTable() {
+        //long start = System.currentTimeMillis();
         String sql = "TRUNCATE TABLE threads CASCADE";
         SqlParameterSource namedParameters = new MapSqlParameterSource();
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
+        //long end = System.currentTimeMillis();
+        //System.out.println("ThreadDAO: clearTable "+(end-start)+"ms");
     }
 }
