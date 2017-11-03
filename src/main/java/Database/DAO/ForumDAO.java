@@ -54,7 +54,7 @@ public class ForumDAO {
 //                "WHERE LOWER(t.forum) = LOWER(:slug) ";
 
         String sql = "SELECT DISTINCT u.* " +
-                "FROM forumUsers fu JOIN users u ON(fu.userNickname = u.nickname) " +
+                "FROM forumUsers fu JOIN users u ON(LOWER(fu.userNickname) = LOWER(u.nickname)) " +
                 "WHERE LOWER(forumSlug) = LOWER(:slug)";
 
         if (!since.isEmpty()) {
