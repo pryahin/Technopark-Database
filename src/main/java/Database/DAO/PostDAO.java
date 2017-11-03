@@ -36,15 +36,15 @@ public class PostDAO {
         String sql = "INSERT INTO posts(id, author, created, forum, message, parent, thread, path)" +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, array_append((SELECT path FROM posts WHERE id = ?), ?))";
         String sql_users = "INSERT INTO forumUsers(userNickname, forumSlug) " +
-                "VALUES (?, ?)";
+                "VALUES ";
+
         if (posts.isEmpty()) {
             //long end = System.currentTimeMillis();
             //System.out.println("PostDAO: createPost " + (end - start) + "ms");
             return;
         }
         try (Connection con = this.jdbcTemplate.getDataSource().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.NO_GENERATED_KEYS);
-             PreparedStatement ps_users = con.prepareStatement(sql_users, Statement.NO_GENERATED_KEYS)) {
+             PreparedStatement ps = con.prepareStatement(sql, Statement.NO_GENERATED_KEYS)) {
 
             for (PostModel post : posts) {
                 if (post.getCreated() == null) {
@@ -64,17 +64,19 @@ public class PostDAO {
                 ps.setInt(9, post.getId());
                 ps.addBatch();
 
-                ps_users.setString(1, post.getAuthor());
-                ps_users.setString(2, post.getForum());
-                ps_users.addBatch();
+                sql_users += "('"+post.getAuthor()+"','"+post.getForum()+"'),";
             }
             ps.executeBatch();
-            ps_users.executeBatch();
 
             sql = "UPDATE forums " +
                     "SET posts = posts + ?" +
                     "WHERE LOWER(slug) = LOWER(?) ";
             this.jdbcTemplate.update(sql, posts.size(), posts.get(0).getForum());
+
+            sql_users = sql_users.substring(0, sql_users.length()-1);
+            sql_users += " ON CONFLICT (usernickname, forumslug) DO NOTHING";
+            this.jdbcTemplate.update(sql_users);
+
             //long end = System.currentTimeMillis();
             //System.out.println("PostDAO: createPost " + (end - start) + "ms");
         } catch (SQLException e) {

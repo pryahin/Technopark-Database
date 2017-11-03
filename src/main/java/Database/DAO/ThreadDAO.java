@@ -49,7 +49,8 @@ public class ThreadDAO {
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
 
         sql = "INSERT INTO forumUsers(userNickname, forumSlug) " +
-                "VALUES (:author, :forum)";
+                "VALUES (:author, :forum) " +
+                "ON CONFLICT (usernickname, forumslug) DO NOTHING";
         this.namedParameterJdbcTemplate.update(sql, namedParameters);
 
         //long end = System.currentTimeMillis();

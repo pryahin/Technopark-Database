@@ -122,7 +122,8 @@ CREATE INDEX indexVoteThread ON votes(thread);
 
 CREATE TABLE IF NOT EXISTS forumUsers (
   userNickname  CITEXT NOT NULL REFERENCES users (nickname),
-  forumSlug TEXT   NOT NULL REFERENCES forums (slug)
+  forumSlug TEXT   NOT NULL REFERENCES forums (slug),
+  UNIQUE (userNickname, forumSlug)
 );
 
 CREATE INDEX IF NOT EXISTS indexForumUsersNickname ON forumUsers(LOWER(userNickname));
