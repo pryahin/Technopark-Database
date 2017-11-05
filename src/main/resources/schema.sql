@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS CITEXT;
-
 DROP TABLE IF EXISTS votes CASCADE;
 DROP TABLE IF EXISTS posts CASCADE;
 DROP TABLE IF EXISTS threads CASCADE;
@@ -37,9 +35,9 @@ DROP INDEX IF EXISTS indexForumUsersForum;
 
 CREATE TABLE IF NOT EXISTS users (
   about    TEXT          NOT NULL,
-  email    CITEXT UNIQUE NOT NULL,
+  email    TEXT UNIQUE NOT NULL,
   fullname TEXT          NOT NULL,
-  nickname CITEXT UNIQUE NOT NULL PRIMARY KEY
+  nickname TEXT UNIQUE NOT NULL PRIMARY KEY
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS indexUserNickname ON users(LOWER(nickname));
@@ -53,7 +51,7 @@ CREATE TABLE IF NOT EXISTS forums (
   slug    TEXT   NOT NULL UNIQUE,
   threads INTEGER,
   title   TEXT   NOT NULL,
-  "user"  CITEXT NOT NULL UNIQUE REFERENCES users (nickname)
+  "user"  TEXT NOT NULL UNIQUE REFERENCES users (nickname)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS indexForumSlug ON forums(LOWER(slug));
@@ -62,12 +60,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS indexForumSlug ON forums(LOWER(slug));
 
 
 CREATE TABLE IF NOT EXISTS threads (
-  author  CITEXT NOT NULL REFERENCES users (nickname),
+  author  TEXT NOT NULL REFERENCES users (nickname),
   created TIMESTAMP DEFAULT current_timestamp,
   forum   TEXT   NOT NULL REFERENCES forums (slug),
   id      SERIAL PRIMARY KEY,
   message TEXT   NOT NULL,
-  slug    CITEXT UNIQUE,
+  slug    TEXT UNIQUE,
   title   TEXT   NOT NULL,
   votes   INTEGER
 );
@@ -81,7 +79,7 @@ CREATE INDEX IF NOT EXISTS indexThreadForumCreated ON threads(LOWER(forum), crea
 
 
 CREATE TABLE IF NOT EXISTS posts (
-  author   CITEXT  NOT NULL REFERENCES users(nickname),
+  author   TEXT  NOT NULL REFERENCES users(nickname),
   created  TIMESTAMP        DEFAULT current_timestamp,
   forum    TEXT    NOT NULL REFERENCES forums(slug),
   id       SERIAL PRIMARY KEY,
@@ -108,7 +106,7 @@ CREATE INDEX IF NOT EXISTS indexPostThreadParentId ON posts(thread, parent, id);
 
 CREATE TABLE IF NOT EXISTS votes (
   id       SERIAL PRIMARY KEY,
-  nickname CITEXT   NOT NULL REFERENCES users(nickname),
+  nickname TEXT   NOT NULL REFERENCES users(nickname),
   voice    SMALLINT NOT NULL,
   thread   INTEGER  NOT NULL REFERENCES threads(id),
   UNIQUE (nickname, thread)
@@ -121,7 +119,7 @@ CREATE INDEX indexVoteThread ON votes(thread);
 
 
 CREATE TABLE IF NOT EXISTS forumUsers (
-  userNickname  CITEXT NOT NULL REFERENCES users (nickname),
+  userNickname  TEXT NOT NULL REFERENCES users (nickname),
   forumSlug TEXT   NOT NULL REFERENCES forums (slug),
   UNIQUE (userNickname, forumSlug)
 );

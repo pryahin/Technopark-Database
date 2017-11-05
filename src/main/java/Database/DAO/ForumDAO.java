@@ -53,7 +53,7 @@ public class ForumDAO {
 //                "FULL OUTER JOIN users u ON (t.author = u.nickname) OR (p.author = u.nickname) OR (f.user = u.nickname) " +
 //                "WHERE LOWER(t.forum) = LOWER(:slug) ";
 
-        String sql = "SELECT DISTINCT u.* " +
+        String sql = "SELECT u.* " +
                 "FROM forumUsers fu JOIN users u ON(LOWER(fu.userNickname) = LOWER(u.nickname)) " +
                 "WHERE LOWER(forumSlug) = LOWER(:slug)";
 
@@ -61,7 +61,7 @@ public class ForumDAO {
             sql += " AND LOWER(u.nickname) " + (desc ? "<" : ">") + " LOWER(:since) ";
         }
 
-        sql += " ORDER BY u.nickname " + (desc ? "DESC " : "ASC ");
+        sql += " ORDER BY LOWER(u.nickname) " + (desc ? "DESC " : "ASC ");
 
         if (limit != 0) {
             sql += " LIMIT " + limit;
