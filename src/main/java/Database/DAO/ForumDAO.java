@@ -47,11 +47,6 @@ public class ForumDAO {
 
     public List<UserModel> getUsers(String slug, int limit, String since, boolean desc) {
         //long start = System.currentTimeMillis();
-//        String sql = "SELECT DISTINCT u.* " +
-//                "FROM threads t FULL OUTER JOIN posts p ON (t.forum = p.forum) " +
-//                "FULL OUTER JOIN forums f ON (t.author = f.user) OR (p.author = f.user)" +
-//                "FULL OUTER JOIN users u ON (t.author = u.nickname) OR (p.author = u.nickname) OR (f.user = u.nickname) " +
-//                "WHERE LOWER(t.forum) = LOWER(:slug) ";
 
         String sql = "SELECT u.* " +
                 "FROM forumUsers fu JOIN users u ON(LOWER(fu.userNickname) = LOWER(u.nickname)) " +
