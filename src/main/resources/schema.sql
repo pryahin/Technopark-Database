@@ -10,18 +10,15 @@ DROP INDEX IF EXISTS indexUserEmail;
 
 DROP INDEX IF EXISTS indexForumSlug;
 
-DROP INDEX IF EXISTS indexThreadId;
 DROP INDEX IF EXISTS indexThreadForum;
 DROP INDEX IF EXISTS indexThreadSlug;
 DROP INDEX IF EXISTS indexThreadForumCreated;
 
-DROP INDEX IF EXISTS indexPostAuthor;
 DROP INDEX IF EXISTS indexPostCreated;
-DROP INDEX IF EXISTS indexPostForum;
 DROP INDEX IF EXISTS indexPostThread;
 DROP INDEX IF EXISTS indexPostThreadPath;
-DROP INDEX IF EXISTS indexPostIdThread;
-DROP INDEX IF EXISTS indexPostThreadPath;
+DROP INDEX IF EXISTS indexPostThreadId;
+DROP INDEX IF EXISTS indexPostThreadPath1;
 DROP INDEX IF EXISTS indexPostPath;
 DROP INDEX IF EXISTS indexPostThreadParent;
 DROP INDEX IF EXISTS indexPostThreadParentId;
@@ -70,7 +67,6 @@ CREATE TABLE IF NOT EXISTS threads (
   votes   INTEGER
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS indexThreadId ON threads(id);
 CREATE INDEX IF NOT EXISTS indexThreadForum ON threads(LOWER(forum));
 CREATE UNIQUE INDEX IF NOT EXISTS indexThreadSlug ON threads(LOWER(slug));
 CREATE INDEX IF NOT EXISTS indexThreadForumCreated ON threads(LOWER(forum), created);
@@ -90,13 +86,11 @@ CREATE TABLE IF NOT EXISTS posts (
   path     INT ARRAY
 );
 
-CREATE INDEX IF NOT EXISTS indexPostAuthor ON posts(author);
 CREATE INDEX IF NOT EXISTS indexPostCreated ON posts(created);
-CREATE INDEX IF NOT EXISTS indexPostForum ON posts(forum);
 CREATE INDEX IF NOT EXISTS indexPostThread ON posts(thread);
 CREATE INDEX IF NOT EXISTS indexPostThreadPath ON posts(thread, path);
-CREATE INDEX IF NOT EXISTS indexPostIdThread ON posts(id, thread);
-CREATE INDEX IF NOT EXISTS indexPostThreadPath ON posts(thread, (path[1]));
+CREATE INDEX IF NOT EXISTS indexPostThreadId ON posts(thread, id);
+CREATE INDEX IF NOT EXISTS indexPostThreadPath1 ON posts(thread, (path[1]));
 CREATE INDEX IF NOT EXISTS indexPostPath ON posts((path[1]));
 CREATE INDEX IF NOT EXISTS indexPostThreadParent ON posts(thread, parent);
 CREATE INDEX IF NOT EXISTS indexPostThreadParentId ON posts(thread, parent, id);
