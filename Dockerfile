@@ -69,4 +69,4 @@ RUN mvn package
 # Объявлем порт сервера
 EXPOSE 5000
 
-CMD service postgresql start && java -jar target/Database-1.0-SNAPSHOT.jar application.Application --database=jdbc:postgresql://localhost5432/docker --username=docker --password=docker
+CMD service postgresql start && java -jar target/Database-1.0-SNAPSHOT.jar application.Application 
