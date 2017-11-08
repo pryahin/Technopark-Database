@@ -5,21 +5,13 @@ MAINTAINER Pryahin Vladimir
 # Обвновление списка пакетов
 RUN apt-get -y update
 
-
-#
-# wget
-#
-RUN apt-get install -y wget
-
 #
 # Установка postgresql
 #
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" >> /etc/apt/sources.list.d/pgdg.list
-RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+ENV PGVER 9.5
 RUN apt-get update
-
-ENV PGVER 10
 RUN apt-get install -y postgresql-$PGVER
+
 # Run the rest of the commands as the ``postgres`` author created by the ``postgres-$PGVER`` package when it was ``apt-get installed``
 USER postgres
 
@@ -30,6 +22,7 @@ RUN /etc/init.d/postgresql start &&\
     createdb -E UTF8 -T template0 -O docker docker &&\
     /etc/init.d/postgresql stop
 
+    
 # Adjust PostgreSQL configuration so that remote connections to the
 # database are possible.
 RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf
@@ -76,4 +69,4 @@ RUN mvn package
 # Объявлем порт сервера
 EXPOSE 5000
 
-CMD service postgresql start && java -jar target/Database-1.0-SNAPSHOT.jar application.Application
+CMD service postgresql start && java -jar target/Database-1.0-SNAPSHOT.jar application.Application --database=jdbc:postgresql://localhost5432/docker --username=docker --password=docker
